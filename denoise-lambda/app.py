@@ -21,6 +21,13 @@ def upload_to_s3(file_name):
     except Exception:
         raise ChaliceViewError('something went wrong')
 
+@app.on_s3_event(bucket=config.S3_UPLOADS_BUCKET_NAME,
+events=['s3:ObjectCreated:*'])
+def react_to_s3_upload(event):
+    bucket = event['Bucket']
+    key = event['Key']
+    return
+
 # The view function above will return {"hello": "world"}
 # whenever you make an HTTP GET request to '/'.
 #

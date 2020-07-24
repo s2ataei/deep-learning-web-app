@@ -1,49 +1,63 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
-import { Container, Button } from '@material-ui/core';
-import axios from 'axios';
+import React, { useRef, useState } from 'react'
+import './App.css'
+import { Button } from '@material-ui/core'
 
-function App() {
+const uploadFile = (file) =>
+  fetch('/upload_image', {
+    method: 'POST',
+    mode: 'cors',
+    body: file,
+  })
+
+const uploadFiles = (...files) => files.map(uploadFile)
+
+const App = () => {
+  const uploadRef = useRef(null)
+  const [files, setFiles] = useState([])
+  const updateFiles = () => setFiles([...uploadRef.current.files])
+  const submitFiles = () => uploadFiles(...files)
+
   return (
     <div className="App">
-      <p> Low Dose CT Denoising Tool: Upload your test image, prediction download will begin automatically. </p>
-
-      <input type="file" className="form-control" name="upload_file" id="main" />
-
+      <p>
+        Low Dose CT Denoising Tool: Upload your test image, prediction download
+        will begin automatically.
+      </p>
+      <input
+        id="file-input"
+        type="file"
+        accept="image/*,application/dicom"
+        multiple
+        ref={uploadRef}
+        onChange={updateFiles}
+        style={{ display: 'none' }}
+      />
+      <label htmlFor="file-input">
+        <Button variant="contained" color="primary" component="span">
+          Select Images
+        </Button>
+      </label>
+      <br />
+      {files.length ? `${files.length} files selected` : ''}
+      {files.length ? (
+        <ol>
+          {files.map(({ name }) => (
+            <li>{name}</li>
+          ))}
+        </ol>
+      ) : (
+        ''
+      )}
       <div className="submit-button">
-        <Button variant="contained" type="submit" onClick={()=>this.submit()}>Upload Image</Button>
+        <Button variant="contained" type="submit" onClick={submitFiles}>
+          Upload Images
+        </Button>
       </div>
-
       <div className="footer">
-      <p> Made with by Sepehr Ataei</p>
+        <p> Made with by Sepehr Ataei</p>
       </div>
     </div>
-  );
+  )
 }
 
-export default App;
-
-submit(){
-
-    const data = new FormData() 
-
-    data.append('file', this.state.selectedFile)
-
-    console.warn(this.state.selectedFile);
-
-    let url = "/upload/";
-
-
-    axios.post(url, data, { // receive two parameter endpoint url ,form data
-
-    })
-
-    .then(res => { // then print response status
-
-        console.warn(res);
-
-    })
-
-
-}
+export default App

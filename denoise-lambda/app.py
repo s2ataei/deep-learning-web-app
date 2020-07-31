@@ -4,6 +4,11 @@ from chalice import Chalice
 app = Chalice(app_name='denoise-lambda')
 s3 = boto3.client('s3')
 
+_SUPPORTED_IMAGE_EXTENSIONS = (
+    '.jpg',
+    '.png',
+)
+
 @app.route('/')
 def index():
     return {'status_code': 200,
@@ -17,6 +22,7 @@ def upload_to_s3(file_name):
         with open(temp_file, 'wb') as f:
             f.write(body)
         s3.upload_file(temp_file, 'imagebucket940127', file_name)
+
         return { 'file_name': 'https://imagebucket940127.s3.ca-central-1.amazonaws.com/' + file_name }
     except Exception:
         raise ChaliceViewError('something went wrong')
@@ -24,9 +30,24 @@ def upload_to_s3(file_name):
 @app.on_s3_event(bucket='imagebucket940127',
 events=['s3:ObjectCreated:*'])
 def react_to_s3_upload(event):
-    bucket = event['Bucket']
-    key = event['Key']
-    return
+    if _is_image(event.key):
+        _handle_created_image(bucket=event.bucket, key=event.key)
+
+def _is_image(key):
+    return key.endswith(_SUPPORTED_IMAGE_EXTENSIONS)
+
+def _handle_created_image(bucket, key):
+    obj = s3.get_object(Bucket=bucket,Key=key)
+    body = obj['Body']
+    print(body)
+
+
+
+
+
+
+
+
 
 # The view function above will return {"hello": "world"}
 # whenever you make an HTTP GET request to '/'.

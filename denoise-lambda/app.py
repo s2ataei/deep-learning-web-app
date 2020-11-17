@@ -1,6 +1,7 @@
 import boto3
 from chalice import Chalice
 
+
 app = Chalice(app_name='denoise-lambda')
 s3 = boto3.client('s3')
 
@@ -37,9 +38,8 @@ def _is_image(key):
     return key.endswith(_SUPPORTED_IMAGE_EXTENSIONS)
 
 def _handle_created_image(bucket, key):
-    obj = s3.get_object(Bucket=bucket,Key=key)
-    body = obj['Body']
-    print(body)
+    obj = s3.download_file(bucket, key, "/tmp/temp.png")
+
 
 
 

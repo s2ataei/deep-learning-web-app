@@ -1,0 +1,34 @@
+{
+  "resources": [
+    {
+      "name": "default-role",
+      "resource_type": "iam_role",
+      "role_arn": "arn:aws:iam::802512717468:role/denoise-lambda-dev",
+      "role_name": "denoise-lambda-dev"
+    },
+    {
+      "name": "react_to_s3_upload",
+      "resource_type": "lambda_function",
+      "lambda_arn": "arn:aws:lambda:ca-central-1:802512717468:function:denoise-lambda-dev-react_to_s3_upload"
+    },
+    {
+      "name": "react_to_s3_upload-s3event",
+      "resource_type": "s3_event",
+      "bucket": "imagebucket940127",
+      "lambda_arn": "arn:aws:lambda:ca-central-1:802512717468:function:denoise-lambda-dev-react_to_s3_upload"
+    },
+    {
+      "name": "api_handler",
+      "resource_type": "lambda_function",
+      "lambda_arn": "arn:aws:lambda:ca-central-1:802512717468:function:denoise-lambda-dev"
+    },
+    {
+      "name": "rest_api",
+      "resource_type": "rest_api",
+      "rest_api_id": "rndao4oe18",
+      "rest_api_url": "https://rndao4oe18.execute-api.ca-central-1.amazonaws.com/api/"
+    }
+  ],
+  "schema_version": "2.0",
+  "backend": "api"
+}

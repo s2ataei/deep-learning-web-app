@@ -1,7 +1,8 @@
 import boto3
-from chalice import Chalice
+from chalice import Chalice, Response
 import numpy as np
 import imageio
+from matplotlib import pyplot as plt
 
 app = Chalice(app_name='denoise-lambda')
 app.debug = True
@@ -32,10 +33,29 @@ def upload_to_s3(file_name):
 
 @app.route('/histogram/{file_name}', methods=['GET'], cors=True)
 def calculate_histogram(file_name):
-    pp = np.random.rand(6,6)
     s3.download_file('imagebucket940127', file_name, '/tmp/' + file_name)
-    im = imageio.imread('/tmp/' + file_name)
-    return {'did_run': im.shape}
+    image = imageio.imread('/tmp/' + file_name)
+
+    colors = ("r", "g", "b")
+    channel_ids = (0, 1, 2)
+
+    plt.xlim([0, 256])
+    for channel_id, c in zip(channel_ids, colors):
+        histogram, bin_edges = np.histogram(
+            image[:, :, channel_id], bins=256, range=(0, 256)
+        )
+        plt.plot(bin_edges[0:-1], histogram, color=c)
+    plt.savefig('/tmp/' + 'histogram_' + file_name)
+
+    with open('/tmp/' + 'histogram_' + file_name, 'rb') as img:
+        img_data = img.read()
+
+    return Response(
+        body=img_data,
+        headers={
+            'Content-Type': 'image/jpeg'
+        },
+        status_code=200)
 
 
 @app.on_s3_event(bucket='imagebucket940127',

@@ -19,20 +19,25 @@ const uploadFiles = (...files) => Promise.mapSeries(files, uploadFile)
   .map(response => response.json())
   .map(({ file_name }) => file_name)
 
-const calculateHistogram = (file) => {
-  console.log(file);
-  let n = file.file.indexOf(".com/")
-  let fileName = file.file.substr(n+5)
-  console.log(fileName)
-  console.log(n)
-  fetch(`https://rndao4oe18.execute-api.ca-central-1.amazonaws.com/api/histogram/${fileName}`, {
 
-    method: 'GET',
-    mode: 'cors',
-  })
-}
 
 const App = () => {
+  const calculateHistogram = (file) => {
+    let n = file.file.indexOf(".com/")
+    let fileName = file.file.substr(n+5)
+    fetch(`https://rndao4oe18.execute-api.ca-central-1.amazonaws.com/api/histogram/${fileName}`, {
+      // headers: {
+      //   'Content-Type': 'image/png',
+      //   Accept: 'image/png'
+      // },
+      method: 'GET',
+      mode: 'cors',
+    })
+    .then(response => response.blob())
+    .then(blob => URL.createObjectURL(blob))
+    .then(url => updateURLs(url))
+  }
+  const [urls,updateURLs] = useState([])
   const uploadRef = useRef(null)
   const [files, setFiles] = useState([])
   const [uploadedFiles, setUploadedFiles] = useState([])
@@ -41,7 +46,6 @@ const App = () => {
     const filenames = await uploadFiles(...files)
     setUploadedFiles(filenames)
   }
- 
 
   return (
     <div className="App">
@@ -63,6 +67,7 @@ const App = () => {
           Select Images
         </Button>
       </label>
+      <img src="http://localhost:3000/2b78c7b2-a4e4-4ef6-974a-f67ac8cc8af3"></img> 
       <br />
       {files.length ? `${files.length} files selected` : ''}
       {files.length ? (
@@ -91,6 +96,11 @@ const App = () => {
             </li>
           ))}
         </ol>
+        <img src = {urls}></img>
+
+
+
+
         </>
       ) : (
         ''

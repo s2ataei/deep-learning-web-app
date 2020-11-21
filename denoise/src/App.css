@@ -13,7 +13,7 @@ h3 {
 .image {
   margin: 10px;
   margin-top: 30px;
-  background-image: url('./model2.png');
+  background-image: url('./media/model2.png');
   background-repeat: no-repeat;
   background-position: center; 
   background-size: contain;
@@ -34,4 +34,8 @@ li {
 
 p {
   margin-top: 20px;
+}
+
+.buttons {
+  margin-left: 10px;
 }

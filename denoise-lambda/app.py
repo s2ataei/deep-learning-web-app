@@ -1,8 +1,10 @@
 import boto3
 from chalice import Chalice
-
+import numpy as np
+import imageio
 
 app = Chalice(app_name='denoise-lambda')
+app.debug = True
 s3 = boto3.client('s3')
 
 _SUPPORTED_IMAGE_EXTENSIONS = (
@@ -27,6 +29,14 @@ def upload_to_s3(file_name):
         return { 'file_name': 'https://imagebucket940127.s3.ca-central-1.amazonaws.com/' + file_name }
     except Exception:
         raise ChaliceViewError('something went wrong')
+
+@app.route('/histogram/{file_name}', methods=['GET'], cors=True)
+def calculate_histogram(file_name):
+    pp = np.random.rand(6,6)
+    s3.download_file('imagebucket940127', file_name, '/tmp/' + file_name)
+    im = imageio.imread('/tmp/' + file_name)
+    return {'did_run': im.shape}
+
 
 @app.on_s3_event(bucket='imagebucket940127',
 events=['s3:ObjectCreated:*'])

@@ -2,6 +2,8 @@ import Promise from 'bluebird'
 import React, { useRef, useState } from 'react'
 import './App.css'
 import { Button } from '@material-ui/core'
+import SaveIcon from '@material-ui/icons/Save';
+
 
 const uploadFile = (file) =>
   fetch(`https://rndao4oe18.execute-api.ca-central-1.amazonaws.com/api/upload/${file.name}`, {
@@ -17,6 +19,19 @@ const uploadFiles = (...files) => Promise.mapSeries(files, uploadFile)
   .map(response => response.json())
   .map(({ file_name }) => file_name)
 
+const calculateHistogram = (file) => {
+  console.log(file);
+  let n = file.file.indexOf(".com/")
+  let fileName = file.file.substr(n+5)
+  console.log(fileName)
+  console.log(n)
+  fetch(`https://rndao4oe18.execute-api.ca-central-1.amazonaws.com/api/histogram/${fileName}`, {
+
+    method: 'GET',
+    mode: 'cors',
+  })
+}
+
 const App = () => {
   const uploadRef = useRef(null)
   const [files, setFiles] = useState([])
@@ -26,13 +41,14 @@ const App = () => {
     const filenames = await uploadFiles(...files)
     setUploadedFiles(filenames)
   }
+ 
 
   return (
     <div className="App">
-      <p>
+      <h2>
         Low Dose CT Denoising Tool: Upload your test image, prediction download
         will begin automatically.
-      </p>
+      </h2>
       <input
         id="file-input"
         type="file"
@@ -52,7 +68,8 @@ const App = () => {
       {files.length ? (
         <ol>
           {files.map(({ name }) => (
-            <li>{name}</li>
+            <li>{name}
+            </li>
           ))}
         </ol>
       ) : (
@@ -65,18 +82,19 @@ const App = () => {
       </div>
       {uploadedFiles.length ? (
         <>
-        <h1>uploaded files:</h1>
+        <h4>uploaded files:</h4>
         <ol>
           {uploadedFiles.map((file) => (
-            <li><a href={file}><img src={file} />{file}</a></li>
+            <li>
+              <a href={file}><img src={file} /><Button className="buttons" variant="contained" color="primary" startIcon={<SaveIcon />}>Save Image</Button></a>
+              <Button className="buttons" variant="contained" onClick={() => calculateHistogram({file})}>Histogram</Button>
+            </li>
           ))}
         </ol>
         </>
       ) : (
         ''
       )}
-      <div className="image">
-      </div>
       <div className="footer">
         <p> Made with ❤ by Sepehr Ataei and LC</p>
       </div>

@@ -39,3 +39,12 @@ p {
 .buttons {
   margin-left: 10px;
 }
+
+.image-container {
+  margin-top: 20px;
+}
+
+.image-container img{
+  max-width: 50%;
+  max-height: 480px;
+}

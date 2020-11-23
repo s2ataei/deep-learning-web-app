@@ -23,21 +23,18 @@ const uploadFiles = (...files) => Promise.mapSeries(files, uploadFile)
 
 const App = () => {
   const calculateHistogram = (file) => {
-    let n = file.file.indexOf(".com/")
-    let fileName = file.file.substr(n+5)
+    console.log(file)
+    let n = file.uploadedFiles[0].indexOf(".com/")
+    let fileName = file.uploadedFiles[0].substr(n+5)
     fetch(`https://rndao4oe18.execute-api.ca-central-1.amazonaws.com/api/histogram/${fileName}`, {
-      // headers: {
-      //   'Content-Type': 'image/png',
-      //   Accept: 'image/png'
-      // },
       method: 'GET',
       mode: 'cors',
     })
-    .then(response => response.blob())
-    .then(blob => URL.createObjectURL(blob))
-    .then(url => updateURLs(url))
+    .then(response => response.json())
+    .then(({ hist_name }) => updateHistograms(hist_name))
   }
-  const [urls,updateURLs] = useState([])
+
+  const [histograms, updateHistograms] = useState([])
   const uploadRef = useRef(null)
   const [files, setFiles] = useState([])
   const [uploadedFiles, setUploadedFiles] = useState([])
@@ -50,8 +47,7 @@ const App = () => {
   return (
     <div className="App">
       <h2>
-        Low Dose CT Denoising Tool: Upload your test image, prediction download
-        will begin automatically.
+        Image Processing Tool: Please upload a PNG image. 
       </h2>
       <input
         id="file-input"
@@ -67,46 +63,27 @@ const App = () => {
           Select Images
         </Button>
       </label>
-      <img src="http://localhost:3000/2b78c7b2-a4e4-4ef6-974a-f67ac8cc8af3"></img> 
       <br />
       {files.length ? `${files.length} files selected` : ''}
-      {files.length ? (
-        <ol>
-          {files.map(({ name }) => (
-            <li>{name}
-            </li>
-          ))}
-        </ol>
-      ) : (
-        ''
-      )}
       <div className="submit-button">
         <Button variant="contained" type="submit" onClick={submitFiles}>
           Upload Images
         </Button>
       </div>
+      <div className="image-container">
+        <a href={uploadedFiles}><img src={uploadedFiles}/></a>
+        <a href={histograms}><img src={histograms}/></a>
+      </div>
       {uploadedFiles.length ? (
-        <>
-        <h4>uploaded files:</h4>
-        <ol>
-          {uploadedFiles.map((file) => (
-            <li>
-              <a href={file}><img src={file} /><Button className="buttons" variant="contained" color="primary" startIcon={<SaveIcon />}>Save Image</Button></a>
-              <Button className="buttons" variant="contained" onClick={() => calculateHistogram({file})}>Histogram</Button>
-            </li>
-          ))}
-        </ol>
-        <img src = {urls}></img>
-
-
-
-
-        </>
+        <div className="buttons">
+          <a href={uploadedFiles}><Button className="buttons" variant="contained" color="primary" startIcon={<SaveIcon />}>Save Image</Button></a>
+          <Button className="buttons" variant="contained" onClick={() => calculateHistogram({uploadedFiles})}>Histogram</Button>
+        </div>
       ) : (
         ''
       )}
       <div className="footer">
-        <p> Made with ❤ by Sepehr Ataei and LC</p>
+        <p> Made with ❤ by Sepehr Ataei</p>
       </div>
     </div>
   )

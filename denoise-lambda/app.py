@@ -35,40 +35,35 @@ def upload_to_s3(file_name):
 def calculate_histogram(file_name):
     s3.download_file('imagebucket940127', file_name, '/tmp/' + file_name)
     image = imageio.imread('/tmp/' + file_name)
-
+        
     colors = ("r", "g", "b")
     channel_ids = (0, 1, 2)
 
-    plt.xlim([0, 256])
+    plt.xlim([0, 255])
     for channel_id, c in zip(channel_ids, colors):
         histogram, bin_edges = np.histogram(
-            image[:, :, channel_id], bins=256, range=(0, 256)
+            image[:, :, channel_id], bins=256, range=(0, 255)
         )
         plt.plot(bin_edges[0:-1], histogram, color=c)
-    plt.savefig('/tmp/' + 'histogram_' + file_name)
+        
+    plt.savefig('/tmp/histogram_' + file_name)
 
-    with open('/tmp/' + 'histogram_' + file_name, 'rb') as img:
-        img_data = img.read()
+    s3.upload_file('/tmp/histogram_' + file_name, 'imagebucket940127', 'histogram_' + file_name)
 
-    return Response(
-        body=img_data,
-        headers={
-            'Content-Type': 'image/jpeg'
-        },
-        status_code=200)
+    return {'hist_name': 'https://imagebucket940127.s3.ca-central-1.amazonaws.com/histogram_' + file_name }
 
 
-@app.on_s3_event(bucket='imagebucket940127',
-events=['s3:ObjectCreated:*'])
-def react_to_s3_upload(event):
-    if _is_image(event.key):
-        _handle_created_image(bucket=event.bucket, key=event.key)
+# @app.on_s3_event(bucket='imagebucket940127',
+# events=['s3:ObjectCreated:*'])
+# def react_to_s3_upload(event):
+#     if _is_image(event.key):
+#         _handle_created_image(bucket=event.bucket, key=event.key)
 
-def _is_image(key):
-    return key.endswith(_SUPPORTED_IMAGE_EXTENSIONS)
+# def _is_image(key):
+#     return key.endswith(_SUPPORTED_IMAGE_EXTENSIONS)
 
-def _handle_created_image(bucket, key):
-    obj = s3.download_file(bucket, key, "/tmp/temp.png")
+# def _handle_created_image(bucket, key):
+#     obj = s3.download_file(bucket, key, "/tmp/temp.png")
 
 
 
